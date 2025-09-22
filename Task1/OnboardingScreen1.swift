@@ -135,52 +135,56 @@ struct OnboardingScreen1: View {
                 }
                 
                 ProgressBar(currentStep: 1)
-                
-                Text("Is this your buisness name?")
-                    .font(.system(size: 21.52, weight: .bold))
-                    .foregroundStyle(Color(hex: "#000000"))
-                    .lineSpacing(9.5)
-                
-                Text("This helps us personalize your experience")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(Color(hex: "#4B5563"))
-                    .lineSpacing(9)
-                
-                TextField("Enter Email", text: $email1)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 10)
-                    .background(
-                        RoundedRectangle(cornerRadius: 7.36)
-                            .stroke(Color(hex: "E5E7EB"), lineWidth: 0.96)
-                    )
-                    .frame(width: 343.14, height: 42.76)
-                    .textInputAutocapitalization(.never)
-                    .keyboardType(.emailAddress)
-                    .autocorrectionDisabled(true)
-                
-                Button {
-                   
-                } label: {
-                    RoundedRectangle(cornerRadius: 7.36)
-                        .fill(
-                            (email1.isEmpty)
-                            ? Color(hex: "#B3D4FF")
-                            : Color(hex: "#528EFE")
+                VStack(alignment:.leading,spacing: 25){
+                    Text("Is this your buisness name?")
+                        .font(.system(size: 21.52, weight: .bold))
+                        .foregroundStyle(Color(hex: "#000000"))
+                        .lineSpacing(9.5)
+                    
+                    Text("This helps us personalize your experience")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Color(hex: "#4B5563"))
+                        .lineSpacing(9)
+                    
+                    TextField("Enter Email", text: $email1)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 10)
+                        .background(
+                            RoundedRectangle(cornerRadius: 7.36)
+                                .stroke(Color(hex: "E5E7EB"), lineWidth: 0.96)
                         )
-                        .frame(width: 343.14, height: 51.5)
-                        .overlay {
-                            HStack {
-                                Text("Continue")
-                                    .font(.system(size: 13.79, weight: .semibold))
-                                    .foregroundStyle(Color.white)
-                                    .lineSpacing(8.31)
-                                
-                                Image(systemName: "chevron.right")
-                                    .foregroundStyle(Color.white)
+                        .frame(width: 343.14, height: 42.76)
+                        .textInputAutocapitalization(.never)
+                        .keyboardType(.emailAddress)
+                        .autocorrectionDisabled(true)
+                    
+                    Button {
+                       
+                    } label: {
+                        RoundedRectangle(cornerRadius: 7.36)
+                            .fill(
+                                (email1.isEmpty)
+                                ? Color(hex: "#B3D4FF")
+                                : Color(hex: "#528EFE")
+                            )
+                            .frame(width: 343.14, height: 51.5)
+                            .overlay {
+                                HStack {
+                                    Text("Continue")
+                                        .font(.system(size: 13.79, weight: .semibold))
+                                        .foregroundStyle(Color.white)
+                                        .lineSpacing(8.31)
+                                    
+                                    Image(systemName: "chevron.right")
+                                        .foregroundStyle(Color.white)
+                                }
                             }
-                        }
+                    }
+                    .disabled(email1.isEmpty)
                 }
-                .disabled(email1.isEmpty)
+                .padding(.leading,12)
+                
+                
                 
                 Spacer() // pushes everything up so bottom elements stay fixed
             }
