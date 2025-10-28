@@ -186,10 +186,9 @@ struct OnboardingScreen1: View {
                 
                 
                 
-                Spacer() // pushes everything up so bottom elements stay fixed
+                Spacer()
             }
             
-            // Gradient rectangle pinned at bottom
             Rectangle()
                 .fill(
                     LinearGradient(
@@ -204,8 +203,7 @@ struct OnboardingScreen1: View {
                 .frame(height: UIScreen.main.bounds.height * 0.42)
                 .frame(maxWidth: .infinity)
                 .ignoresSafeArea(edges: .bottom)
-            
-            // Rectangle with circle ABOVE gradient
+
             Rectangle()
                 .fill(Color(hex: "#FFFFFF"))
                 .frame(width: 340.57, height: 325)
@@ -234,7 +232,7 @@ struct OnboardingScreen1: View {
                                 }
                                 
                                 VStack{
-                                        Text("Crenox") // placeholder if nothing typed yet
+                                        Text("Crenox")
                                                    .font(.system(size: 7.21, weight: .regular))
                                                    .foregroundStyle(Color(hex:"0A2540"))
                                     
@@ -271,8 +269,8 @@ struct OnboardingScreen1: View {
 }
 
 struct ProgressBar: View {
-    var currentStep: Int // 1 to 3
-    let totalSteps = 3
+    var currentStep: Int 
+    let totalSteps = 4
     
     var progress: CGFloat {
         CGFloat(currentStep) / CGFloat(totalSteps)
@@ -281,13 +279,12 @@ struct ProgressBar: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .leading) {
-                // Background bar
+                
                 Rectangle()
                     .fill(Color.gray.opacity(0.3))
                     .frame(height: 8)
                     .cornerRadius(4)
                 
-                // Progress fill
                 Rectangle()
                     .fill(Color.blue)
                     .frame(width: geometry.size.width * progress,
@@ -295,7 +292,7 @@ struct ProgressBar: View {
                     .cornerRadius(4)
             }
         }
-        .frame(height: 8) // lock height
+        .frame(height: 8)
         .padding()
         .animation(.easeInOut, value: currentStep)
     }
