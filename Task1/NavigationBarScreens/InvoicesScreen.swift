@@ -10,24 +10,26 @@ import SwiftUI
 struct InvoicesScreen: View {
     @State private var showGridView1: Bool = true
     var body: some View {
-        VStack(alignment: .leading,spacing: 30){
-            topView()
-            searchBarInvoices()
-                .padding(.leading,20)
-            cardViewInvoices(showGridView: $showGridView1)
-                .padding(.leading,20)
-                .padding(.trailing,20)
-            
-            if showGridView1 {
-                basicGridViewInvoices()
-            } else {
-                listViewInvoices()
+        NavigationStack{
+            VStack(alignment: .leading,spacing: 30){
+                topView()
+                searchBarInvoices()
+                    .padding(.leading,20)
+                cardViewInvoices(showGridView: $showGridView1)
+                    .padding(.leading,20)
+                    .padding(.trailing,20)
+                
+                if showGridView1 {
+                    basicGridViewInvoices()
+                } else {
+                    listViewInvoices()
+                }
+                Spacer()
+                //            bottomView()
             }
-            Spacer()
-//            bottomView()
+            .edgesIgnoringSafeArea(.bottom)
+            .navigationBarBackButtonHidden(true)
         }
-        .edgesIgnoringSafeArea(.bottom)
-        .navigationBarBackButtonHidden(true)
     }
 }
 
@@ -78,9 +80,8 @@ struct basicGridViewInvoices : View {
                     Text("Your Invoices Are Waiting!")
                         .font(.system(size: 14, weight: .regular))
                         .foregroundStyle(Color(hex: "#37383B"))
-                    Button {
-                        addInvoiceButtonisPressed.toggle()
-                    } label: {
+                    
+                    NavigationLink(destination: addInvoiceScreen(addInvoiceButtonPressed: $addInvoiceButtonisPressed)){
                         RoundedRectangle(cornerRadius: 8)
                             .fill(Color(hex: "528EFE"))
                             .frame(width: 109,height: 32)
@@ -97,6 +98,11 @@ struct basicGridViewInvoices : View {
                                 }
                             }
                     }
+//                    Button {
+//                        addInvoiceButtonisPressed.toggle()
+//                    } label: {
+//                        
+//                    }
                     
                     Text("To Get Started")
                         .font(.system(size: 14, weight: .regular))
@@ -110,12 +116,6 @@ struct basicGridViewInvoices : View {
             .padding(50)
             .padding(.leading,20)
             .padding(.top,20)
-            if addInvoiceButtonisPressed {
-                addInvoiceScreen(addInvoiceButtonPressed: $addInvoiceButtonisPressed)
-                    .transition(.scale.combined(with: .opacity))
-                    .zIndex(1)
-                    .offset(y: -50)
-            }
         }
     }
 }
@@ -129,7 +129,7 @@ struct listViewInvoices: View {
                     .frame(height: 25.77)
                     .foregroundStyle(Color.white)
                     .padding(.horizontal, 12)
-               
+                
                 
                 VStack(alignment: .center) {
                     Spacer()
@@ -141,12 +141,7 @@ struct listViewInvoices: View {
                         Text("No Invoices To Show Yet!")
                             .font(.system(size: 10.79, weight: .regular))
                             .foregroundStyle(Color(hex: "#37383B"))
-                        
-                        Button {
-                            withAnimation(.spring()) {
-                                addInvoiceButtonisPressed.toggle()
-                            }
-                        } label: {
+                        NavigationLink(destination: addInvoiceScreen(addInvoiceButtonPressed: $addInvoiceButtonisPressed)){
                             RoundedRectangle(cornerRadius: 6.17)
                                 .fill(Color(hex: "528EFE"))
                                 .frame(width: 84.03, height: 25.17)
@@ -162,17 +157,12 @@ struct listViewInvoices: View {
                                     }
                                 }
                         }
+
                     }
                     .padding(.top, 10)
                     .padding(.bottom,200)
                     Spacer()
                 }
-            }
-            if addInvoiceButtonisPressed {
-                addInvoiceScreen(addInvoiceButtonPressed: $addInvoiceButtonisPressed)
-                    .transition(.scale.combined(with: .opacity))
-                    .zIndex(1)
-                    .offset(y: -50)
             }
         }
     }
@@ -206,6 +196,8 @@ struct searchBarInvoices : View {
         }
     }
 }
+
+
 
 #Preview {
     InvoicesScreen()

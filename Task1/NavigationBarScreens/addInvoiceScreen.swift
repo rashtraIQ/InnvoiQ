@@ -4,58 +4,137 @@
 //  Created by Rashtra Humane on 27/10/25.
 
 import SwiftUI
+
 struct Invoice: Identifiable,Equatable{
     let id = UUID()
+    // new items data
     var description: String
     var quantity: Int
     var price: Int
-    var units: Int
+    var amount: Int {
+        return price * quantity
+    }
 }
 
-struct addInvoiceScreen: View {
-    @Binding var addInvoiceButtonPressed: Bool
-    @State private var invoices: [Invoice] = [
-        Invoice(description: "Website Design", quantity: 3, price: 2500, units: 10),
-        Invoice(description: "Logo Design", quantity: 2, price: 1500, units: 5),
-        Invoice(description: "App Development", quantity: 1, price: 9999, units: 1)
-    ]
+struct addClient: Identifiable,Equatable{
+    let id = UUID()
+    var clientName: String = ""
+    var dateSelected: Date? = nil
+    var status: Bool = false
     
+    // extra information
+    var clientAddress: String = ""
+    var clientNumber: String = ""
+    var clientEmail: String = ""
+    var paymentMethod: String = "Credit Card"
+    var paymentTerms: String = ""
+    var currencyType: String = ""
+    var note: String = ""
+}
+
+
+struct addInvoiceScreen: View {
+    @State var client = addClient()
+    @State private var selectedItems: [String] = []
+    @Binding var addInvoiceButtonPressed: Bool
+    @State private var showAddItemPopup = false
+    @State private var invoices: [Invoice] = []
+    @State private var navigateToInvoices = false
+    
+    //    var onSave: ([Invoice]) -> Void // newly added
+    var totalAmount: Int {
+            invoices.reduce(0) { $0 + $1.amount }
+    }
     var body: some View {
         ZStack {
             Rectangle()
                 .fill(Color(hex: "F5F5F9"))
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .edgesIgnoringSafeArea(.bottom)
+                .edgesIgnoringSafeArea(.top)
             
             ScrollView {
                 VStack(alignment: .leading, spacing: 15) {
                     Text("Add Invoice")
                         .font(.system(size: 18, weight: .bold))
                         .foregroundStyle(Color(hex: "37383B"))
+                        .padding(.leading,20)
                     
-                    CustomInputType(heading: "Client Name", placeholder: "Enter Client Name")
-                    CustomInputType(heading: "Client Address", placeholder: "Enter Client's Address", fieldHeight: 140)
-                    CustomInputType(heading: "Client Number", placeholder: "Enter Client's Number", keyboardType: .numberPad)
-                    CustomInputType(heading: "Client Email", placeholder: "Enter Client's Email", keyboardType: .emailAddress)
-                    CustomDateInputType(heading: "Due Date", placeholder: "dd-mm-yyyy")
+                    CustomInputType(heading: "Client Name", placeholder: "Enter Client Name", keyboardType: .default, text: $client.clientName)
+                    
+                    CustomInputType(heading: "Client Address", placeholder: "Enter Client's Address", keyboardType: .default, fieldHeight: 140, text: $client.clientAddress)
+                    
+                    CustomInputType(heading: "Client Number", placeholder: "Enter Client's Number",keyboardType: .numberPad, text: $client.clientNumber)
+                    
+                    CustomInputType(heading: "Client Email", placeholder: "Enter Client's Email", keyboardType: .emailAddress, text: $client.clientEmail)
+                    
+                    CustomDateInputType(heading: "Due Date", placeholder: "dd-mm-yyyy", selectedDate: $client.dateSelected)
+                    
                     DropdownInputType(heading: "Payment Method", placeholder: "Credit Card", options: ["USD - United States Dollar", "EUR - Euro", "GBP - British Pound"])
-                    CustomInputType(heading: "Payment Terms", placeholder: "Enter Payment Terms")
+                    
+                    CustomInputType(heading: "Payment Terms", placeholder: "Enter Payment Terms",keyboardType: .default,text: $client.paymentTerms)
+                    
                     DropdownInputType(heading: "Currency", placeholder: "USD - United States Dollar", options: ["Credit Card", "Bank Transfer", "PayPal"])
-                    CustomInputType(heading: "Note", placeholder: "Enter Note", fieldHeight: 140)
+                    
+                    CustomInputType(heading: "Note", placeholder: "Enter Note",keyboardType: .default,
+                                    fieldHeight: 140, text: $client.note)
                     
                     FilterSearchBar(
                         heading: "List Of Items",
                         placeholder: "Search or add item",
-                        options: ["Electronics", "Mobiles", "Laptops", "Headphones", "Watches", "Home Appliances", "Books", "Toys"]
-                    ) { selectedItem in
-                        let newInvoice = Invoice(description: selectedItem, quantity: 1, price: 500, units: 1)
-                        invoices.append(newInvoice)
+                        options: ["API Development", "Domain & SSL Setup", "Technical Support", "AI Automation", "Freelance Work", "Web Development", "Qunatum Research"],
+                        onSelect: { selectedItem in
+                            let newInvoice = Invoice(description: selectedItem, quantity: 1, price: 500)
+                            invoices.append(newInvoice)
+                        },
+                        selectedOptions: $selectedItems
+                    )
+                    .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ShowAddItemPopup"))) { _ in
+                        showAddItemPopup = true
                     }
                     
-
+                    
+                    
                     InvoiceTableView(invoices: $invoices)
                     
+                    VStack{
+                        HStack{
+                            Text("Sub total (excl. Taxes) :")
+                                .font(.system(size: 18, weight: .regular))
+                                .foregroundStyle(.gray)
+                            
+                            Rectangle()
+                                .fill(Color(hex: "FFFFFF"))
+                                .frame(width:120,height: 40)
+                                .overlay {
+                                    Text("$ \(totalAmount)")
+                                        .font(.system(size: 18, weight: .regular))
+                                        .foregroundStyle(Color(hex: "37383B"))
+                                }
+                            
+                        }
+                        //                        HStack{
+                        //                            Text("Total Taxes :")
+                        //                                .font(.system(size: 18, weight: .regular))
+                        //                                .foregroundStyle(.gray)
+                        //
+                        //                            Rectangle()
+                        //                                .fill(Color(hex: "FFFFFF"))
+                        //                                .frame(width:120,height: 40)
+                        //                                .overlay {
+                        //                                    Text("$ \(totalAmt)")
+                        //                                    .font(.system(size: 18, weight: .regular))
+                        //                                    .foregroundStyle(Color(hex: "37383B"))
+                        //                                }
+                        //
+                        //                        }
+                    }
+                    .padding(.leading, 20)
+                    
                     HStack {
-                        Button { } label: {
+                        Button {
+                            navigateToInvoices = true
+                        } label: {
                             RoundedRectangle(cornerRadius: 8)
                                 .fill(Color(hex: "528EFE"))
                                 .frame(width: 160, height: 40)
@@ -66,7 +145,9 @@ struct addInvoiceScreen: View {
                                 }
                         }
                         
-                        Button { } label: {
+                        Button {
+                            
+                        } label: {
                             RoundedRectangle(cornerRadius: 8)
                                 .fill(Color(hex: "F9AE86"))
                                 .frame(width: 160, height: 40)
@@ -78,25 +159,158 @@ struct addInvoiceScreen: View {
                         }
                     }
                     .padding(.leading, 20)
+                    NavigationLink(
+                        destination: InvoicesScreen2(client: $client, totalAmount: totalAmount),
+                        isActive: $navigateToInvoices
+                    ) { EmptyView() }
                 }
                 .padding(.leading, 10)
             }
+            
+            if showAddItemPopup {
+                Color.black.opacity(0.4)
+                    .ignoresSafeArea()
+                    .onTapGesture { showAddItemPopup = false }
+                AddNewItemPopup(isPresented: $showAddItemPopup, invoices: $invoices)
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("NewItemAdded"))) { notification in
+            if let newItem = notification.object as? String {
+                selectedItems.append(newItem)
+            }
+        }
+        .navigationBarBackButtonHidden(true)
+        
+    }
+}
+struct CustomDateInputType: View {
+    var heading: String
+    var placeholder: String
+    var fieldHeight: CGFloat? = nil
+    @Binding var selectedDate: Date?
+    @State private var showDatePicker: Bool = false
+    
+    var body: some View {
+        ZStack {
+            VStack(alignment: .leading) {
+                Text(heading)
+                    .font(.system(size: 18, weight: .regular))
+                    .foregroundStyle(Color(hex: "37383B"))
+                    .lineSpacing(12)
+                
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.white)
+                    .frame(width: 330, height: fieldHeight ?? 46)
+                    .shadow(color: .black.opacity(0.18), radius: 8, x: 0, y: 3)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .strokeBorder(
+                                showDatePicker
+                                ? Color(hex: "528EFE")
+                                : Color(hex: "#BFC2D1"),
+                                lineWidth: 1.5
+                            )
+                            .overlay(
+                                HStack {
+                                    Text(selectedDate == nil
+                                         ? placeholder
+                                         : formattedDate(selectedDate!))
+                                    .foregroundStyle(selectedDate == nil ? Color(hex: "94969E") : .black)
+                                    .padding(.horizontal, 15)
+                                    .onTapGesture {
+                                        showDatePicker = true
+                                    }
+                                    
+                                    Spacer()
+                                    Image(systemName: "calendar")
+                                        .foregroundColor(.gray)
+                                        .padding(.trailing, 15)
+                                        .onTapGesture {
+                                            showDatePicker = true
+                                        }
+                                }
+                            )
+                    )
+            }
+            .padding(.horizontal, 20)
+        }
+        .sheet(isPresented: $showDatePicker) {
+            VStack {
+                DatePicker(
+                    "Select Date",
+                    selection: Binding(
+                        get: { selectedDate ?? Date() },
+                        set: { newValue in selectedDate = newValue }
+                    ),
+                    displayedComponents: [.date]
+                )
+                .datePickerStyle(.graphical)
+                .padding()
+                
+                Button("Done") {
+                    showDatePicker = false
+                }
+                .padding(.bottom, 10)
+            }
+            .presentationDetents([.medium])
+        }
+    }
+    private func formattedDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        return formatter.string(from: date)
+    }
+}
+
+struct CustomInputType: View {
+    var heading: String
+    var placeholder: String
+    var keyboardType: UIKeyboardType
+    var fieldHeight : CGFloat? = nil
+    @Binding var text: String
+    @FocusState private var isFocused: Bool
+    var body: some View {
+        ZStack {
+            VStack(alignment: .leading){
+                Text(heading)
+                    .font(.system(size: 18, weight: .regular))
+                    .foregroundStyle(Color(hex: "37383B"))
+                    .lineSpacing(12)
+                
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.white)
+                    .frame(width: 330, height: fieldHeight ?? 46)
+                    .shadow(color: .black.opacity(0.18), radius: 8, x: 0, y: 3)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .strokeBorder(isFocused ? Color(hex: "528EFE") : Color(hex: "#BFC2D1"), lineWidth: 1.5)
+                            .overlay(
+                                TextField(placeholder, text: $text)
+                                    .keyboardType(keyboardType)
+                                    .foregroundStyle(text.isEmpty ? Color(hex: "94969E") : .black)
+                                    .padding(.horizontal, 15)
+                                    .padding(.bottom, (fieldHeight ?? 46) > 46 ? 100 : 0)
+                                    .focused($isFocused)
+                            )
+                    )
+            }
+            .padding(.horizontal,20)
         }
     }
 }
 struct FlowLayout<Data: RandomAccessCollection, Content: View>: View where Data.Element: Hashable {
     var items: Data
     var content: (Data.Element) -> Content
-
+    
     init(items: Data, @ViewBuilder content: @escaping (Data.Element) -> Content) {
         self.items = items
         self.content = content
     }
-
+    
     var body: some View {
         var width = CGFloat.zero
         var height = CGFloat.zero
-
+        
         return GeometryReader { geometry in
             ZStack(alignment: .topLeading) {
                 ForEach(items, id: \.self) { item in
@@ -127,15 +341,13 @@ struct FlowLayout<Data: RandomAccessCollection, Content: View>: View where Data.
         }
         .frame(height: calculateHeight(for: items.count))
     }
-
+    
     private func calculateHeight(for count: Int) -> CGFloat {
         return CGFloat(ceil(Double(count) / 3.0) * 40)
     }
 }
-
 struct InvoiceTableView: View {
     @Binding var invoices: [Invoice]
-    
     @State private var selectedInvoice: Invoice? = nil
     @State private var showEditSheet = false
     @State private var activeMenuId: UUID? = nil
@@ -150,7 +362,7 @@ struct InvoiceTableView: View {
                             Text("Description").frame(width: 180, alignment: .leading)
                             Text("Quantity").frame(width: 100, alignment: .trailing)
                             Text("Price").frame(width: 100, alignment: .trailing)
-                            Text("Units").frame(width: 100, alignment: .trailing)
+                            Text("Amount").frame(width: 100, alignment: .trailing)
                             Text("Action").frame(width: 100, alignment: .trailing)
                         }
                         .font(.system(size: 16, weight: .semibold))
@@ -163,11 +375,21 @@ struct InvoiceTableView: View {
                         ForEach(Array(invoices.enumerated()), id: \.element.id) { index, invoice in
                             HStack {
                                 Text("\(index + 1)").frame(width: 70, alignment: .leading)
-                                Text(invoice.description).frame(width: 180, alignment: .leading)
-                                Text("\(invoice.quantity)").frame(width: 100, alignment: .trailing)
-                                Text("\(invoice.price)").frame(width: 100, alignment: .trailing)
-                                Text("\(invoice.units)").frame(width: 100, alignment: .trailing)
                                 
+                                Text(invoice.description).frame(width: 180, alignment: .leading)
+                                
+                                Stepper(value: Binding(
+                                    get: { invoices[index].quantity },
+                                    set: { newValue in invoices[index].quantity = newValue }
+                                ), in: 0...999) {
+                                    Text("\(invoices[index].quantity)")
+                                        .frame(width: 30)
+                                }
+                                .frame(width: 90,alignment: .center)
+                                
+                                Text("\(invoice.price)").frame(width: 100, alignment: .trailing)
+                                
+                                Text("\(invoice.amount)").frame(width: 100, alignment: .trailing)
                                 ZStack(alignment: .topTrailing) {
                                     Button {
                                         withAnimation {
@@ -178,9 +400,12 @@ struct InvoiceTableView: View {
                                             .fill(Color(hex: "528EFE"))
                                             .frame(width: 80, height: 30)
                                             .overlay {
-                                                Text("Action")
-                                                    .foregroundStyle(.white)
-                                                    .font(.system(size: 13, weight: .semibold))
+                                                HStack {
+                                                    Text("Action")
+                                                    Image(systemName: "chevron.down")
+                                                }
+                                            .foregroundStyle(.white)
+                                            .font(.system(size: 10, weight: .semibold))
                                             }
                                     }
                                     
@@ -192,7 +417,6 @@ struct InvoiceTableView: View {
                                                 activeMenuId = nil
                                             } label: {
                                                 HStack {
-                                                    Image(systemName: "pencil")
                                                     Text("Edit")
                                                 }
                                                 .frame(maxWidth: .infinity)
@@ -207,7 +431,6 @@ struct InvoiceTableView: View {
                                                 activeMenuId = nil
                                             } label: {
                                                 HStack {
-                                                    Image(systemName: "trash")
                                                     Text("Delete")
                                                 }
                                                 .frame(maxWidth: .infinity)
@@ -255,7 +478,7 @@ struct EditInvoiceView: View {
     @Environment(\.dismiss) var dismiss
     @State var invoice: Invoice
     var onSave: (Invoice) -> Void
-
+    
     var body: some View {
         NavigationView {
             Form {
@@ -264,7 +487,7 @@ struct EditInvoiceView: View {
                     .keyboardType(.numberPad)
                 TextField("Price", value: $invoice.price, format: .number)
                     .keyboardType(.decimalPad)
-                TextField("Units", value: $invoice.units, format: .number)
+                TextField("Amount", value: $invoice.price, format: .number)
                     .keyboardType(.numberPad)
             }
             .navigationTitle("Edit Invoice")
@@ -282,18 +505,17 @@ struct EditInvoiceView: View {
                 }
             }
         }
-    }
-}
+    }}
 struct FilterSearchBar: View {
     var heading: String
     var placeholder: String
     var options: [String]
     var onSelect: (String) -> Void
-    
+    @Binding var selectedOptions: [String]
     @State private var allOptions: [String] = []
     @State private var searchText: String = ""
     @State private var isExpanded: Bool = false
-    @State private var selectedOptions: [String] = []
+    //    @State private var selectedOptions: [String] = []
     @FocusState private var isFocused: Bool
     
     var body: some View {
@@ -312,7 +534,7 @@ struct FilterSearchBar: View {
                         RoundedRectangle(cornerRadius: 8)
                             .strokeBorder(isFocused || isExpanded ? Color(hex: "528EFE") : Color(hex: "#BFC2D1"), lineWidth: 1.5)
                     )
-
+                
                 HStack {
                     TextField(placeholder, text: $searchText)
                         .padding(.horizontal, 15)
@@ -320,7 +542,12 @@ struct FilterSearchBar: View {
                         .disableAutocorrection(true)
                         .focused($isFocused)
                         .onTapGesture { withAnimation { isExpanded = true } }
-
+                        .onSubmit {
+                            if !options.contains(where: { $0.localizedCaseInsensitiveCompare(searchText) == .orderedSame }) {
+                                NotificationCenter.default.post(name: NSNotification.Name("ShowAddItemPopup"), object: nil)
+                            }
+                        }
+                    
                     Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                         .foregroundColor(.gray)
                         .padding(.trailing, 15)
@@ -361,19 +588,21 @@ struct FilterSearchBar: View {
                 .cornerRadius(8)
                 .shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 3)
             }
-
+            
             if !selectedOptions.isEmpty {
                 FlowLayout(items: selectedOptions) { item in
                     HStack(spacing: 5) {
                         Text(item)
+                            .foregroundStyle(Color.white)
                         Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(Color.white)
                             .onTapGesture {
                                 selectedOptions.removeAll { $0 == item }
                             }
                     }
                     .padding(.vertical, 6)
                     .padding(.horizontal, 10)
-                    .background(Color(hex: "E9F1FF"))
+                    .background(Color(hex: "528EFE"))
                     .cornerRadius(8)
                 }
                 .padding(.top, 5)
@@ -387,11 +616,11 @@ struct DropdownInputType: View {
     var heading: String
     var placeholder: String
     var options: [String]
-
+    
     @State private var selectedOption: String = ""
     @State private var isExpanded: Bool = false
     @FocusState private var isFocused: Bool
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(heading)
@@ -406,14 +635,14 @@ struct DropdownInputType: View {
                         RoundedRectangle(cornerRadius: 8)
                             .strokeBorder(isFocused || isExpanded ? Color(hex: "528EFE") : Color(hex: "#BFC2D1"), lineWidth: 1.5)
                     )
-
+                
                 HStack {
                     Text(selectedOption.isEmpty ? placeholder : selectedOption)
                         .foregroundStyle(selectedOption.isEmpty ? Color(hex: "94969E") : .black)
                         .padding(.leading, 15)
-
+                    
                     Spacer()
-
+                    
                     Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                         .foregroundStyle(Color.gray)
                         .padding(.trailing, 15)
@@ -425,7 +654,7 @@ struct DropdownInputType: View {
                 }
                 .padding(.trailing, 20)
             }
-
+            
             if isExpanded {
                 VStack(spacing: 0) {
                     ForEach(options, id: \.self) { option in
@@ -455,121 +684,90 @@ struct DropdownInputType: View {
     }
 }
 
-struct CustomDateInputType: View {
-    var heading: String
-    var placeholder: String
-    var fieldHeight: CGFloat? = nil
-    @State private var selectedDate: Date? = nil
-    @State private var showDatePicker: Bool = false
 
+
+
+struct AddNewItemPopup: View {
+    @Binding var isPresented: Bool
+    @Binding var invoices: [Invoice]
+    @State private var description: String = ""
+    @State private var quantity: String = ""
+    @State private var price: String = ""
+    @State private var units: String = ""
+    
     var body: some View {
         ZStack {
-            VStack(alignment: .leading) {
-                Text(heading)
-                    .font(.system(size: 18, weight: .regular))
-                    .foregroundStyle(Color(hex: "37383B"))
-                    .lineSpacing(12)
-
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.white)
-                    .frame(width: 330, height: fieldHeight ?? 46)
-                    .shadow(color: .black.opacity(0.18), radius: 8, x: 0, y: 3)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .strokeBorder(
-                                showDatePicker
-                                ? Color(hex: "528EFE")
-                                : Color(hex: "#BFC2D1"),
-                                lineWidth: 1.5
-                            )
-                            .overlay(
-                                HStack {
-                                    Text(selectedDate == nil
-                                         ? placeholder
-                                         : formattedDate(selectedDate!))
-                                    .foregroundStyle(selectedDate == nil ? Color(hex: "94969E") : .black)
-                                    .padding(.horizontal, 15)
-                                    .onTapGesture {
-                                        showDatePicker = true
-                                    }
-
-                                    Spacer()
-                                    Image(systemName: "calendar")
-                                        .foregroundColor(.gray)
-                                        .padding(.trailing, 15)
-                                        .onTapGesture {
-                                            showDatePicker = true
-                                        }
-                                }
-                            )
-                    )
-            }
-            .padding(.horizontal, 20)
-        }
-        .sheet(isPresented: $showDatePicker) {
-            VStack {
-                DatePicker(
-                    "Select Date",
-                    selection: Binding(
-                        get: { selectedDate ?? Date() },
-                        set: { newValue in selectedDate = newValue }
-                    ),
-                    displayedComponents: [.date]
-                )
-                .datePickerStyle(.graphical)
-                .padding()
-
-                Button("Done") {
-                    showDatePicker = false
+            // Dimmed background
+            Color.black.opacity(0.4)
+                .ignoresSafeArea()
+                .onTapGesture {
+                    withAnimation { isPresented = false }
                 }
-                .padding(.bottom, 10)
+            
+            VStack(spacing: 15) {
+                Text("Add New Item")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(.black)
+                
+                TextField("Description", text: $description)
+                    .padding()
+                    .background(Color.white)
+                    .cornerRadius(8)
+                
+                TextField("Quantity", text: $quantity)
+                    .keyboardType(.numberPad)
+                    .padding()
+                    .background(Color.white)
+                    .cornerRadius(8)
+                
+                TextField("Price", text: $price)
+                    .keyboardType(.decimalPad)
+                    .padding()
+                    .background(Color.white)
+                    .cornerRadius(8)
+                
+                TextField("Units", text: $units)
+                    .keyboardType(.numberPad)
+                    .padding()
+                    .background(Color.white)
+                    .cornerRadius(8)
+                
+                HStack {
+                    Button("Cancel") {
+                        withAnimation { isPresented = false }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.gray.opacity(0.2))
+                    .cornerRadius(8)
+                    
+                    Button("Add") {
+                        let newInvoice = Invoice(
+                            description: description,
+                            quantity: Int(quantity) ?? 1,
+                            price: Int(price) ?? 0,
+                        )
+                        invoices.append(newInvoice)
+                        NotificationCenter.default.post(name: NSNotification.Name("NewItemAdded"), object: description)
+                        withAnimation { isPresented = false }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color(hex: "528EFE"))
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                }
             }
-            .presentationDetents([.medium])
+            .padding()
+            .frame(width: 320)
+            .background(Color.white)
+            .cornerRadius(16)
+            .shadow(radius: 10)
         }
-    }
-    private func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        return formatter.string(from: date)
+        .animation(.easeInOut, value: isPresented)
     }
 }
 
-struct CustomInputType: View {
-    var heading: String
-    var placeholder: String
-    var keyboardType: UIKeyboardType = .default
-    var fieldHeight : CGFloat? = nil
-    @State private var text: String = ""
-    @FocusState private var isFocused: Bool
-    var body: some View {
-        ZStack {
-            VStack(alignment: .leading){
-                Text(heading)
-                    .font(.system(size: 18, weight: .regular))
-                    .foregroundStyle(Color(hex: "37383B"))
-                    .lineSpacing(12)
-
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.white)
-                    .frame(width: 330, height: fieldHeight ?? 46)
-                    .shadow(color: .black.opacity(0.18), radius: 8, x: 0, y: 3)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .strokeBorder(isFocused ? Color(hex: "528EFE") : Color(hex: "#BFC2D1"), lineWidth: 1.5)
-                            .overlay(
-                                TextField(placeholder, text: $text)
-                                    .keyboardType(keyboardType)
-                                    .foregroundStyle(text.isEmpty ? Color(hex: "94969E") : .black)
-                                    .padding(.horizontal, 15)
-                                    .padding(.bottom, (fieldHeight ?? 46) > 46 ? 100 : 0)
-                                    .focused($isFocused)
-                            )
-                    )
-            }
-            .padding(.horizontal,20)
-        }
-    }
-}
 #Preview {
     addInvoiceScreen(addInvoiceButtonPressed: .constant(true))
 }

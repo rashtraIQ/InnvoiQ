@@ -13,7 +13,7 @@ struct ContentView: View {
     @State private var opacities: [Double] = Array(repeating: 0.0, count: 6)
     @State private var navigateToLogin = false
     
-    let brandName = Array("InoviQ")
+    let brandName = Array("InvoiQ")
     let blueColor = Color(hex: "#528EFE")
     let orangeColor = Color(hex: "#F9AE86")
     var body: some View {

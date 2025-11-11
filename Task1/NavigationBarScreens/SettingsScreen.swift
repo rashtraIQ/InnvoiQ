@@ -154,7 +154,7 @@ struct SettingsScreen: View {
             
             // MARK: - Main Content
             VStack(spacing: 0) {
-                topBarForSettings(showMenu: $showMenu) // 👈 pass binding
+                topBarForSettings(showMenu: $showMenu) 
                 
                 ZStack {
                     Color.white.ignoresSafeArea()
