@@ -1,36 +1,12 @@
 //
-//  ClientScreen.swift
+//  ClientViews.swift
 //  Task1
 //
-//  Created by Rashtra Humane on 07/10/25.
+//  Created by Rashtra Humane on 25/11/25.
 //
 
+import Foundation
 import SwiftUI
-
-struct ClientScreen: View {
-    @State private var showGridView1: Bool = true
-    var body: some View {
-        VStack(alignment: .leading,spacing: 30){
-            topView()
-            searchBar()
-                .padding(.leading,20)
-            cardView(showGridView: $showGridView1)
-                .padding(.leading,20)
-                .padding(.trailing,20)
-            
-            if showGridView1 {
-                basicGridView()
-            } else {
-                listView()
-            }
-            Spacer()
-//            bottomView()
-        }
-        .edgesIgnoringSafeArea(.bottom)
-        .navigationBarBackButtonHidden(true)
-    }
-}
-
 struct cardView : View {
     @Binding var showGridView: Bool
     var body: some View {
@@ -253,6 +229,57 @@ struct gridView: View {
     }
 }
 
-#Preview {
-    ClientScreen()
+struct clientAPIData: View {
+    let client: ClientModel
+    var body: some View {
+        ZStack{
+            RoundedRectangle(cornerRadius: 10)
+                .frame(width: .infinity,height: 200)
+                .foregroundStyle(Color(hex: "F5F5F9"))
+            HStack {
+                VStack(alignment: .leading,spacing: 15){
+                    Text("Sr. No")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(Color(hex: "#000000"))
+                    Text("Name")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(Color(hex: "#000000"))
+                    Text("Address")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(Color(hex: "#000000"))
+                    Text("Taxes")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(Color(hex: "#000000"))
+                }
+                .frame(width: .infinity)
+                VStack(alignment: .leading,spacing: 15){
+                    Text("\(client.id)")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundStyle(Color(hex: "#000000"))
+                    Text(client.name)
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundStyle(Color(hex: "#000000"))
+                    Text(client.address)
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundStyle(Color(hex: "#000000"))
+                    HStack(spacing: 0){
+                        Text(client.taxes.taxName)
+                            .font(.system(size: 12, weight: .regular))
+                            .foregroundStyle(Color(hex: "#000000"))
+                        Text("(\(client.taxes.taxRate)%)")
+                            .font(.system(size: 8, weight: .regular))
+                            .foregroundStyle(Color(hex: "#94969E"))
+                    }
+                    
+                }
+                .frame(width: .infinity)
+            }
+        }
+        .padding(.leading,15)
+        .padding(.trailing,15)
+        
+    }
 }
+//#Preview{
+//    clientAPIData()
+//}

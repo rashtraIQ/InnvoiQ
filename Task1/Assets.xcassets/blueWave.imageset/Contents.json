@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "blueWave.pdf",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

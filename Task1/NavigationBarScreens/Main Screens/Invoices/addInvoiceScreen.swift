@@ -4,6 +4,102 @@
 //  Created by Rashtra Humane on 27/10/25.
 
 import SwiftUI
+import PDFKit
+
+struct PDFViewer: UIViewRepresentable {
+    let pdfData: Data
+
+    func makeUIView(context: Context) -> PDFView {
+        let pdfView = PDFView()
+        pdfView.autoScales = true
+        pdfView.document = PDFDocument(data: pdfData)
+        return pdfView
+    }
+
+    func updateUIView(_ uiView: PDFView, context: Context) {}
+}
+
+import UIKit
+
+struct PDFBuilder {
+    static func generateInvoicePDF(
+        client: addClient,
+        invoices: [Invoice],
+        totalAmount: Int
+    ) -> Data {
+
+        let pdfMetaData = [
+            kCGPDFContextCreator: "InvoiQ App",
+            kCGPDFContextAuthor: "Rashtra Humane",
+            kCGPDFContextTitle: "Invoice Preview"
+        ]
+
+        let format = UIGraphicsPDFRendererFormat()
+        format.documentInfo = pdfMetaData as [String: Any]
+
+        let pageWidth = 8.5 * 72.0
+        let pageHeight = 11 * 72.0
+        let pageRect = CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
+
+        let renderer = UIGraphicsPDFRenderer(bounds: pageRect, format: format)
+
+        let data = renderer.pdfData { context in
+            context.beginPage()
+
+            let titleFont = UIFont.boldSystemFont(ofSize: 24)
+            let bodyFont = UIFont.systemFont(ofSize: 16)
+
+            var yOffset: CGFloat = 40
+
+            func drawText(_ text: String, font: UIFont, x: CGFloat, y: CGFloat) {
+                let attributes: [NSAttributedString.Key: Any] = [.font: font]
+                text.draw(at: CGPoint(x: x, y: y), withAttributes: attributes)
+            }
+
+            // Title
+            drawText("Invoice", font: titleFont, x: 40, y: yOffset)
+            yOffset += 40
+
+            // Client Details
+            drawText("Client Name: \(client.clientName)", font: bodyFont, x: 40, y: yOffset)
+            yOffset += 25
+
+            drawText("Address: \(client.clientAddress)", font: bodyFont, x: 40, y: yOffset)
+            yOffset += 25
+
+            drawText("Email: \(client.clientEmail)", font: bodyFont, x: 40, y: yOffset)
+            yOffset += 25
+
+            drawText("Phone: \(client.clientNumber)", font: bodyFont, x: 40, y: yOffset)
+            yOffset += 40
+
+            // Invoice Table Header
+            drawText("Description", font: bodyFont, x: 40, y: yOffset)
+            drawText("Qty", font: bodyFont, x: 220, y: yOffset)
+            drawText("Price", font: bodyFont, x: 300, y: yOffset)
+            drawText("Amount", font: bodyFont, x: 400, y: yOffset)
+            yOffset += 20
+
+            // Invoice Items
+            for item in invoices {
+                drawText(item.description, font: bodyFont, x: 40, y: yOffset)
+                drawText("\(item.quantity)", font: bodyFont, x: 220, y: yOffset)
+                drawText("$\(item.price)", font: bodyFont, x: 300, y: yOffset)
+                drawText("$\(item.amount)", font: bodyFont, x: 400, y: yOffset)
+                yOffset += 20
+            }
+
+            yOffset += 40
+
+            // Total
+            drawText("Total Amount: $\(totalAmount)", font: titleFont, x: 40, y: yOffset)
+        }
+
+        return data
+    }
+}
+
+
 
 struct Invoice: Identifiable,Equatable{
     let id = UUID()
@@ -34,6 +130,8 @@ struct addClient: Identifiable,Equatable{
 
 
 struct addInvoiceScreen: View {
+    @State private var showPDF = false
+    @State private var generatedPDF: Data? = nil
     @State var client = addClient()
     @State private var selectedItems: [String] = []
     @Binding var addInvoiceButtonPressed: Bool
@@ -146,7 +244,12 @@ struct addInvoiceScreen: View {
                         }
                         
                         Button {
-                            
+                            generatedPDF = PDFBuilder.generateInvoicePDF(
+                            client: client,
+                                invoices: invoices,
+                                totalAmount: totalAmount
+                            )
+                            showPDF = true
                         } label: {
                             RoundedRectangle(cornerRadius: 8)
                                 .fill(Color(hex: "F9AE86"))
@@ -180,6 +283,12 @@ struct addInvoiceScreen: View {
             }
         }
         .navigationBarBackButtonHidden(true)
+        .sheet(isPresented: $showPDF) {
+            if let pdfData = generatedPDF {
+                PDFViewer(pdfData: pdfData)
+            }
+        }
+
         
     }
 }

@@ -1,37 +1,11 @@
 //
-//  InvoicesScreen.swift
+//  InvoicesViews.swift
 //  Task1
 //
-//  Created by Rashtra Humane on 08/10/25.
+//  Created by Rashtra Humane on 25/11/25.
 //
 
 import SwiftUI
-
-struct InvoicesScreen: View {
-    @State private var showGridView1: Bool = true
-    var body: some View {
-        NavigationStack{
-            VStack(alignment: .leading,spacing: 30){
-                topView()
-                searchBarInvoices()
-                    .padding(.leading,20)
-                cardViewInvoices(showGridView: $showGridView1)
-                    .padding(.leading,20)
-                    .padding(.trailing,20)
-                
-                if showGridView1 {
-                    basicGridViewInvoices()
-                } else {
-                    listViewInvoices()
-                }
-                Spacer()
-                //            bottomView()
-            }
-            .edgesIgnoringSafeArea(.bottom)
-            .navigationBarBackButtonHidden(true)
-        }
-    }
-}
 
 struct cardViewInvoices : View {
     @Binding var showGridView: Bool
@@ -101,7 +75,7 @@ struct basicGridViewInvoices : View {
 //                    Button {
 //                        addInvoiceButtonisPressed.toggle()
 //                    } label: {
-//                        
+//
 //                    }
                     
                     Text("To Get Started")
@@ -198,7 +172,83 @@ struct searchBarInvoices : View {
 }
 
 
-
-#Preview {
-    InvoicesScreen()
+struct invoicesAPIData : View {
+    let invoice: InvoicesModel
+    var body: some View {
+        RoundedRectangle(cornerRadius: 10)
+            .fill(Color.gray.opacity(0.1))
+            .frame(width: .infinity,height: 250)
+            .overlay {
+                VStack(spacing: 10){
+                    HStack{
+                        Text("Sr.No")
+                            .font(.system(size: 18, weight: .regular))
+                            .foregroundStyle(.gray)
+                        Spacer()
+                        Text("\(invoice.id)")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundStyle(.black)
+                        
+                    }
+                    HStack{
+                        Text("Date")
+                            .font(.system(size: 18, weight: .regular))
+                            .foregroundStyle(.gray)
+                        Spacer()
+                        if let date = invoice.invoicesDate as? Date{
+                            Text("\(formattedDate(date))")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundStyle(.black)
+                        }
+                            
+                    }
+                    HStack{
+                        Text("Name")
+                            .font(.system(size: 18, weight: .regular))
+                            .foregroundStyle(.gray)
+                        Spacer()
+                        Text(invoice.customerName)
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundStyle(.black)
+                    }
+                    HStack{
+                        Text("Amount")
+                            .font(.system(size: 18, weight: .regular))
+                            .foregroundStyle(.gray)
+                        Spacer()
+                        Text("\(invoice.total)")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundStyle(.black)
+                    }
+                    HStack{
+                        Text("Status")
+                            .font(.system(size: 18, weight: .regular))
+                            .foregroundStyle(.gray)
+                        Spacer()
+//                        CustomDropdown(selected: $selectedStatus)
+                        
+                    }
+                    HStack{
+                        Text("Action")
+                            .font(.system(size: 18, weight: .regular))
+                            .foregroundStyle(.gray)
+                        Spacer()
+//                        EditDropdownButton(client: $client)
+                    }
+                }
+                .padding(.leading,20)
+                .padding(.trailing,20)
+            }
+            .padding(.leading,20)
+            .padding(.trailing,20)
+            
+    }
+    private func formattedDate(_ date: Date) -> String {
+            let formatter = DateFormatter()
+            formatter.dateStyle = .medium
+            return formatter.string(from: date)
+    }
 }
+
+
+

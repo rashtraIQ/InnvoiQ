@@ -26,8 +26,9 @@ struct MainBottomBar: View {
                 case .items:
                     ItemsScreen()
                 case .settings:
-                    SettingsScreen()
-                }  
+//                    SettingsScreen()
+               
+                }
                 Spacer(minLength: 0)
             }
             
@@ -167,24 +168,6 @@ struct Dashboard : View {
     }
 }
 
-//struct Invoices : View {
-//    var isSelected: Bool
-//    var action: () -> Void
-//    var body: some View {
-//        Button(action: action) {
-//            VStack{
-//                Image("invoices")
-//                    .renderingMode(.template)
-//                    .resizable()
-//                    .frame(width: 64, height: 32)
-//                    .foregroundStyle(isSelected ? Color(hex: "528EFE") : Color(hex: "#2B3232"))
-//                Text("Invoices")
-//                    .font(.system(size: 12, weight: .regular))
-//                    .foregroundStyle(isSelected ? Color(hex: "528EFE") : Color(hex: "2B3232"))
-//            }
-//        }
-//    }
-//}
 
 struct Clients : View {
     var isSelected: Bool

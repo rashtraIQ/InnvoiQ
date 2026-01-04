@@ -92,7 +92,6 @@ struct FloatingButtonExample: View {
     
     var body: some View {
         ZStack {
-            // MARK: Main Screen Content
             VStack(spacing: 40) {
                 Text("Main Screen")
                     .font(.largeTitle)
@@ -109,9 +108,8 @@ struct FloatingButtonExample: View {
                 .clipShape(Capsule())
             }
             
-            // MARK: Custom Popup Overlay
             if showPopup {
-                Color.black.opacity(0.4) // dim background
+                Color.black.opacity(0.4) 
                     .ignoresSafeArea()
                     .onTapGesture {
                         withAnimation(.spring()) {

@@ -134,7 +134,7 @@ struct clientDetails: View {
             let formatter = DateFormatter()
             formatter.dateStyle = .medium
             return formatter.string(from: date)
-        }
+    }
 }
 struct EditDropdownButton: View {
     @Binding var client: addClient 
